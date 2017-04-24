@@ -1,0 +1,193 @@
+<html>
+
+<head>
+  <title>Painters II</title>
+  <meta content="Automatas, noise, perlin noise, canvas, js, creative coding, generative art, genart" name="keywords">
+  <meta content="Semi autonomus organisms that paint over a canvas" name="description">
+  <style>
+    body{
+      font-family: 'Open Sans', 'Verdana', 'Monospaced';
+      margin: 0 auto;
+      overflow: hidden;
+      color: #222;
+    }
+    div{
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 30px;
+    }
+  </style>
+
+  <script src='../js/perlin.js'></script>
+  <!-- <script src="../js/ga.js"></script> -->
+
+  <head>
+
+    <body>
+
+      <canvas id="canvas"></canvas>
+      <div>
+      <span>Click to restart</span>
+      </div>
+
+      <script type="text/javascript">
+        var canvas = document.getElementById("canvas");
+        var ctx = canvas.getContext("2d");
+        var Width, Height;
+        var particleCount = 80,
+        particles = null,
+        minDist = 200;
+        var frame = 0;
+
+        function paintCanvas() {
+          ctx.fillStyle = "#fff";
+          //ctx.fillStyle = "rgba(230,230,230,0.5)";
+          ctx.fillRect(0,0,Width,Height);
+        }
+
+        function Particle(id) {
+
+          this.lifeTime = 10;
+          this.tx = 0;
+          this.ty = 0;
+          this.x = this.y = 0;
+
+          this.resetPosition = function(){
+            this.x = Math.random() * Width;
+            this.y = Math.random() * Height;
+          }
+
+          this.update = function(){
+            //get a new x and y position 
+            this.x = noise.perlin3(this.tx, this.y, frame);
+          }
+
+          this.resetVelocity = function(){
+            //this.vx = -1 + Math.random() * 2;
+            //this.vy = -1 + Math.random() * 2;
+
+            this.vx = noise.perlin3(this.x, this.y, frame);
+            this.vy = this.vx;
+          }
+
+          this.resetVelocity();
+          this.resetPosition();
+
+        }
+
+        function setSizes(){
+          Width = window.innerWidth;
+          Height = window.innerHeight;
+          canvas.width = Width;
+          canvas.height = Height;
+        }
+
+        function init(){
+
+          particles = [];
+          for(var i = 0; i < particleCount; i++) {
+            particles.push(new Particle(i));
+          }
+        }
+
+        function onWindowClick(){
+          paintCanvas();
+          for(var i = 0; i < particleCount; i++) {
+            particles[i].resetPosition();
+            particles[i].resetVelocity();
+          }
+        }
+
+        function onWindowResize(){
+          setSizes();
+          init();
+        }
+
+
+        function update() {
+
+          for (var i = 0; i < particles.length; i++) {
+            p = particles[i];
+
+            p.x += p.vx;
+            p.y += p.vy
+
+            if(p.x > Width) 
+              p.x = 0;
+
+            else if(p.x < 0) {
+              p.x = Width;
+            }
+
+            if(p.y > Height) 
+              p.y = 0;
+
+            else if(p.y  < 0) {
+              p.y = Height;
+            }
+
+            for(var j = i + 1; j < particles.length; j++) {
+              p2 = particles[j];
+              distance(p, p2);
+            }
+
+          }
+        }
+
+        // Distance calculator between two particles
+        function distance(p1, p2) {
+          var dist,
+          dx = p1.x - p2.x;
+          dy = p1.y - p2.y;
+
+          dist = Math.floor(Math.sqrt(dx*dx + dy*dy));
+
+          if(dist <= minDist) {
+
+            var color = "rgba(30,50,50,"+ (1.0-dist/minDist) +")";
+            var r = dist;
+            var g = dist%100;
+            var b = dist%255;
+            var color = "rgba("+r+","+g+","+b+","+ (1.0-dist/minDist) +")";
+            ctx.beginPath();
+            ctx.strokeStyle = color;
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+            ctx.closePath();
+
+          }
+        }
+
+        // Start the main animation loop using requestAnimFrame
+        function animate() {
+//          paintCanvas();
+          update();
+          requestAnimFrame(animate);
+          frame += 0.01;
+        }
+
+        window.requestAnimFrame = (function(){
+          return  window.requestAnimationFrame       || 
+          window.webkitRequestAnimationFrame || 
+          window.mozRequestAnimationFrame    || 
+          window.oRequestAnimationFrame      || 
+          window.msRequestAnimationFrame     ||  
+          function( callback ){
+            window.setTimeout(callback, 1000 / 60);
+          };
+        })();
+
+        window.addEventListener( 'click', onWindowClick, false );
+        window.addEventListener( 'resize', onWindowResize, false );
+
+
+        setSizes();
+        init();
+        animate();
+
+      </script>
+
+    </body>
+    </html>

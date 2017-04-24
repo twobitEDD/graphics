@@ -1,0 +1,191 @@
+<html lang="en">
+<head>
+	<title>Kaleidoscope</title>
+	<meta content="Threejs, WebGl, shaders,  js, creative coding, generative art, genart" name="keywords">
+	<meta content="Kaleidoscope made with Threejs shaders " name="description">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<meta property="og:image" content="http://jlchapa.azurewebsites.net/img/kaleidoscopeSquare.png" />
+
+	<style>
+		body {
+			background-color: #000;
+			color: #FFF;
+			margin: 0px;
+			overflow: hidden;
+		}
+
+		#container{
+			margin: 0 auto;
+		}
+		p{
+			position: absolute;
+			bottom: 0;
+			left: 0;
+		}
+	</style>
+</head>
+<body>
+
+	<div id="container"></div>
+	<p>Kaleidoscope made with Threejs shaders, <br/> <b>Click and drag to manipulate </b> </p>
+
+	<script src="../js/build/three.min.js"></script>
+	<script src="../js/build/TrackballControls.js"></script>
+	<script src="../js/jquery-2.1.3.min.js"></script>
+	<script src="../js/randomColor.js"></script>
+	<script src="shaders/EffectComposer.js"></script>
+	<script src="shaders/RenderPass.js"></script>
+	<script src="shaders/ShaderPass.js"></script>
+	<script src="shaders/MaskPass.js"></script> 
+	<script src="shaders/CopyShader.js"></script>
+	<script src="shaders/KaleidoShader.js"></script>
+	<script src="shaders/RGBShiftShader.js"></script>
+
+	<script>
+
+	/*The idea is to create a new and unique kaleidoscope every time, 
+
+	To achieve this we are going to create a simple scene, with a bunch of moving cubes. 
+	We randomize their initial position, rotation and size. We will update this values inside the animation loop.
+
+	Then we add the shader pass, one for the rgb and another one for the kaleidoscope effect, their parameters like number of sides and angles are also randomized.
+	*/
+
+	var container, camera, scene, renderer, controls;
+	var kaleidoParams, kaleidoPass, rgbParams, rgbPass, composer;
+	var colorNames = ["red", "yellow", "blue", "green", "orange", "purple", "pink", "monochrome"];
+	var p = [0,1,2,3.1];
+	var cubes = [ [],[],[],[] ];
+
+	function init() {
+
+		scene = new THREE.Scene();
+		camera = new THREE.PerspectiveCamera(55, 1, 20, 3000);
+		camera.position.z = 1000;
+
+		var ambient = new THREE.AmbientLight(0x121212);
+		var light1 = createDirectionalLight(500, 1, -200, 200, 500);
+		scene.add(ambient);
+		scene.add(light1);
+
+		var geometry = new THREE.CubeGeometry(50, 50, 50);
+		colorName = colorNames[Math.floor(Math.random()*colorNames.length)];
+
+		for(var i = 0; i < 4; i++) {
+			for(var j = 0; j < 10; j++) {
+				var material = new THREE.MeshLambertMaterial({color: randomColor({hue: colorName})});
+				var cube = new THREE.Mesh(geometry, material);
+
+				cube.position.x = (j-5)*105;
+				cube.position.y = (i-1)*120;
+				cube.position.z = (i-2)*100;
+				cube.scale.x = cube.scale.y = cube.scale.z = Math.random() * 3 + 0.2;
+
+				scene.add(cube);
+				cubes[i].push(cube);
+			}
+		}
+
+		renderer = new THREE.WebGLRenderer({});
+		//We want to set it as a square so the kaleidoscope looks good
+		renderer.setSize( window.innerHeight, window.innerHeight );
+
+		$("#container").width(window.innerHeight);
+		$("#container").append(renderer.domElement);
+
+		//POST PROCESSING
+		var renderPass = new THREE.RenderPass( scene, camera );
+		rgbPass = new THREE.ShaderPass( THREE.RGBShiftShader );
+		kaleidoPass = new THREE.ShaderPass( THREE.KaleidoShader );
+
+		//Add Shader Passes to Composer
+		composer = new THREE.EffectComposer( renderer);
+		composer.addPass( renderPass );
+		composer.addPass( kaleidoPass );
+		composer.addPass( rgbPass );
+		//since the rgb pass is the last we set it to renderToScreen
+		rgbPass.renderToScreen = true;
+
+		rgbPass.uniforms[ "angle" ].value = Math.random()*2*3.1416;
+		rgbPass.uniforms[ "amount" ].value = Math.random()*0.01;
+		kaleidoPass.uniforms[ "sides" ].value = Math.random()*14+2;
+
+		createControls();
+		window.addEventListener('resize', onWindowResize, false);
+		setInterval(changeColors, 250);
+	}
+
+	function changeColors(){
+		
+		for(var i = 0; i < 4; i++) {
+			var colorName = colorNames[Math.floor(Math.random()*colorNames.length-1)];
+		//var newColor = randomColor({hue: colorName, format: 'rgbAray'});
+		var newColor = randomColor({hue: colorName});
+			for(var j = 0; j < 10; j++) {
+				//cubes[i][j].material.color.setRGB( newColor[0], newColor[1], newColor[2] );
+				cubes[i][j].material.color.setStyle( newColor );
+			}
+		}
+	}
+
+	function animate() {
+		for(var i = 0; i < 4; i++) {
+			for(var j = 0; j < 10; j++) {
+				var cube = cubes[i][j];
+				cube.position.z += Math.sin(p[i]);
+				cube.position.y += Math.cos(p[i]*j);
+
+				cube.rotation.x += 0.002*j;
+				cube.rotation.y += 0.01;
+				p[i] += 0.001;
+			}
+		}
+
+		composer.render();
+		//renderer.render(scene, camera);
+		controls.update();
+		requestAnimationFrame( animate );
+	}
+
+	function createControls(){
+		controls = new THREE.TrackballControls(camera, renderer.domElement);
+		controls.target.set(0, 120, 0);
+		controls.rotateSpeed = 1.0;
+		controls.zoomSpeed = 1.2;
+		controls.panSpeed = 0.8;
+		controls.noZoom = false;
+		controls.noPan = false;
+	}
+
+	function createDirectionalLight(d, intensity, x, y, z) {
+		var light = new THREE.DirectionalLight(0xdfebff, intensity);
+
+		light.position.set(x, y, z);
+		light.castShadow = true;
+		light.shadowMapWidth = light.shadowMapHeight = 512;
+		light.shadowCameraLeft = -d;
+		light.shadowCameraRight = d;
+		light.shadowCameraTop = d;
+		light.shadowCameraBottom = -d;
+		light.shadowCameraFar = 10000;
+		light.shadowDarkness = 0.8;
+
+		return light;
+	}
+
+	function onWindowResize() {
+		camera.aspect = 1;
+		camera.updateProjectionMatrix();
+		renderer.setSize(window.innerHeight, window.innerHeight);
+		$("#container").width(window.innerHeight);
+	}
+
+	init();
+	animate();
+
+
+</script>
+
+<script src="../js/ga.js"></script>
+
+</body></html>
