@@ -1,0 +1,245 @@
+<html>
+
+<head>
+	<title>Planets</title>
+	<meta content="canvas, js, creative coding, generative art, genart" name="keywords">
+	<meta content="Semi autonomus organisms that attract their nearby neighbors. " name="description">
+
+	<script src='../js/tinycolor.js'></script>
+	<script src='../js/randomcolor.js'></script>
+
+	<style>
+	body{
+		font-family: 'Open Sans', 'Verdana', 'Monospaced';
+		margin: 0 auto;
+		overflow: hidden;
+		color: #fff;
+		background: #004799;			
+	}
+	div{
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		height: 30px;
+	}
+
+	</style>
+
+	<head>
+
+		<body>
+
+			<canvas id="canvas"></canvas>
+
+			<script type="text/javascript">
+
+			window.requestAnimFrame = (function(){
+				return  window.requestAnimationFrame       || 
+				window.webkitRequestAnimationFrame || 
+				window.mozRequestAnimationFrame    || 
+				window.oRequestAnimationFrame      || 
+				window.msRequestAnimationFrame     ||  
+				function( callback ){
+					window.setTimeout(callback, 1000 / 60);
+				};
+			})();
+
+
+				//Dibujar un planeta
+				//Ponerle un color de fondo
+				//Tamano grande
+				//ribbon
+
+
+				// var xxx = randomColor({hue:"random", luminosity: 'dark'});
+				// color = tinycolor(xxx).darken(5).toRgbString();
+				// var color2 = tinycolor(color).brighten(5).saturate(10).toRgbString();
+				// console.log(color);
+
+				var color = randomColor({hue:"blue", luminosity: 'dark'});
+				var color2 = tinycolor(color).triad()[2].toRgbString();
+				console.log(color2);
+				// color = tinycolor(xxx).darken(5).toRgbString();
+				// var color2 = tinycolor(color).brighten(5).saturate(10).toRgbString();
+				// console.log(color);
+
+				var canvas = document.getElementById("canvas");
+				var ctx = canvas.getContext("2d");
+				var Width, Height;
+				var planetCount = 5;
+				var planets = [];
+				var PI2 = Math.PI * 2;
+				var PI180 = Math.PI / 180;
+
+				function paintCanvas() {
+					ctx.fillStyle = "rgba(0,0,0,1)";
+					ctx.fillStyle = "#000181";
+					ctx.fillRect(0,0,Width,Height);
+					//ctx.clearRect(0,0,Width,Height);
+				}
+
+				
+				function Planet(id) {
+
+					this.radius = 20 + Math.floor(Math.random()*70);
+					this.baseColor = "#F00";
+					this.moons = [];
+					this.x = 0;
+					this.y = 0;
+					this.angle = 0;
+					this.vel = 0.1;
+					this.angle1 = 0;
+					this.angle2 = 3.14;
+					this.angleDelta = 10 * PI180;
+					this.numberOfPaths =1;// Math.random() * this.radius;
+
+					this.resetPosition = function(){
+						this.centerX = Math.floor(Math.random() * Width-100);
+						this.centerY = Math.floor(Math.random() * Height-100);
+						this.vel = (-0.5 + (Math.random()*this.radius / 100))/10;
+						//this.radius = 20+Math.random()*50;
+						
+						this.angle1 = Math.random()*180;
+						this.angle2 = (this.angle1+(Math.random()*150 + 30))*PI180;
+						this.angle1 = this.angle1 * PI180;
+						this.x = this.centerX;
+						this.y = this.centerY;
+						//console.log(this.angle1);
+					}
+
+					this.draw = function() {
+						//ctx.fillStyle= "rgba(200,200,200,1)";
+						ctx.save();
+						//ctx.fillStyle = "#3CFDC3";
+						ctx.fillStyle = randomColor();
+						ctx.shadowBlur=this.radius/2;
+						ctx.shadowColor="#0189D2";
+						ctx.beginPath();
+						ctx.arc(this.x, this.y, this.radius, 0, PI2);
+						ctx.closePath();
+						ctx.fill();
+						ctx.clip(); //make sure all the next curves are drawing inside the planet area
+
+						for(var i=0; i< this.numberOfPaths; i++){
+							this.drawPath();
+						}
+						ctx.restore();
+
+					}
+
+					this.drawPath = function(){
+
+						this.angleDelta = (Math.random()*10 + 5) * PI180;
+
+						this.angle1 = Math.random()*180;
+						this.angle2 = (this.angle1+(Math.random()*150 + 30))*PI180;
+						this.angle1 = this.angle1 * PI180;
+						
+						var x1 = this.x + Math.cos(this.angle1) * this.radius;
+						var x11 = this.x + Math.cos(this.angle1 + this.angleDelta) * this.radius;
+
+						var x2 = this.x + Math.cos(this.angle2) * this.radius;
+						var x22 = this.x + Math.cos(this.angle2 - this.angleDelta) * this.radius;
+
+						var y1 = this.y + Math.sin(this.angle1) * this.radius;
+						var y11 = this.y + Math.sin(this.angle1 + this.angleDelta) * this.radius;
+
+						var y2 = this.y + Math.sin(this.angle2) * this.radius;
+						var y22 = this.y + Math.sin(this.angle2 - this.angleDelta) * this.radius;
+						
+						//console.log(this.angle1, this.angle2);
+						//console.log(x1, y1, x2, y2);
+
+						ctx.beginPath();
+						ctx.moveTo(x1, y1);
+
+					    // line 2
+					    //ctx.lineTo(x2, y2);
+					    //ctx.quadraticCurveTo(x2, y1+100, x2, y2);
+					    ctx.bezierCurveTo(x1+50, y1+50, x2-80, y2-80, x2, y2);
+
+					    ctx.quadraticCurveTo(x2, y2, x22, y22);
+
+					    //ctx.lineTo(x11, y11);
+					    ctx.bezierCurveTo(x22-50, y22-50, x11+20, y11+20, x11, y11);
+					    ctx.quadraticCurveTo(x11, y11, x1, y1);
+
+					    ctx.lineWidth = 2;
+					    ctx.fillStyle = ctx.strokeStyle = randomColor();
+					    //ctx.fillStyle = randomColor({hue:'purple'});
+					    ctx.shadowBlur=0;
+					    //ctx.stroke();
+					    ctx.fill();
+					    ctx.closePath();
+
+					}
+
+					this.moveInOrbit = function(){
+						this.angle+=this.vel;
+
+
+						this.x = Math.sin(this.angle%180)*this.radius + this.centerX + Math.cos(this.angle%6.1)*this.radius;
+						this.y = Math.cos(this.angle%180)*this.radius + this.centerY;
+
+
+
+						//console.log("move in orbit", this.x, this.y);
+						
+					}
+
+					this.resetPosition();
+				}
+
+				function setSizes(){
+					Width = window.innerWidth;
+					Height = window.innerHeight;
+					canvas.width = Width;
+					canvas.height = Height;
+				}
+
+				function init(){
+
+					for(var i = 0; i < planetCount; i++) {
+						this.planets.push(new Planet(i));
+					}
+
+
+				}
+
+				window.addEventListener( 'click', onWindowClick, false );
+
+				function onWindowClick(){
+
+
+
+				}
+
+				function update() {
+
+					var i;
+					var len = planets.length;
+					for(i=0; i<len; i++){
+						var p = planets[i];
+						
+						p.moveInOrbit();
+						p.draw();
+					}
+
+				}
+
+				
+				// Start the main animation loop using requestAnimFrame
+				function animate() {
+					paintCanvas();
+					update();
+					//requestAnimFrame(animate);
+				}
+
+				setSizes();
+				init();
+				animate();
+
+				</script>
+
+			</body>
+			</html>

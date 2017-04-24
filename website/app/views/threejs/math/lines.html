@@ -1,0 +1,156 @@
+<html>
+
+<head>
+  <title>Lines</title>
+  <style>
+    body{
+      font-family: 'Open Sans', 'Verdana', 'Monospaced';
+      margin: 0 auto;
+      overflow: hidden;
+      color: #222;
+    }
+
+    div{
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      width: 200px;
+      padding: 20px;
+    }
+    h1{
+      font-weight: 200;
+      font-size: 20pt;
+      margin: 5px 0;
+    }
+    a{
+      text-decoration: none;
+      background-color: #0078e7;
+      font-size: 14pt;
+      padding: 5px 10px;
+      border-radius: 3px;
+      border:none;
+      margin-top: 10px;
+      display: inline-block;
+      color: #fff;
+    }
+
+    a:hover{
+      background-color: #1f8dd6;
+    } 
+
+    a:visited{
+      color: #fff;
+    }
+  </style>
+  <script src="../js/randomColor.js"></script>
+  <script src="../js/ga.js"></script>
+  <head>
+
+    <body>
+     <div>
+      <h1>Lines</h1>
+      <a href="#" onclick="start()">Create new</a> <br/>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <script>
+
+
+      // RequestAnimFrame: a browser API for getting smooth animations
+      window.requestAnimFrame = (function(){
+        return window.requestAnimationFrame       || 
+        window.webkitRequestAnimationFrame || 
+        window.mozRequestAnimationFrame    || 
+        window.oRequestAnimationFrame      || 
+        window.msRequestAnimationFrame     ||
+        function( callback ){
+          window.setTimeout(callback, 1000/60);
+        };
+      })();
+
+
+      var canvas  = document.getElementById('canvas');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      var ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#000';
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 0.5;
+      var line = {x: 0, y: 150, x2:10, y2:0};
+      var max = 100;
+      var cant = 0;
+
+      var colorsGris = randomColor({count: 100, hue: 'monochrome'});
+      var colorsNaranja = randomColor({count: 100, hue: 'green'});
+
+      function update(){
+        var m = (line.y2 - line.y) / (line.x2 - line.x);
+        if (m==0 || m == NaN){
+          console.log("TERmino");
+          restart();
+          return;
+        }
+        var b = line.y2 -(m * line.x2);
+        var xInRange = Math.floor(Math.random() * (line.x2 - line.x) + line.x);
+        var y = Math.floor(m * xInRange + b);
+        //console.log("M="+m+" b="+b);
+        line.x = xInRange;
+        line.y = y;
+
+        var r = Math.random();
+        if(r<0.25){
+          line.x2 = 0;
+          line.y2 = Math.floor(Math.random()*canvas.height);  
+        }
+        else if (r < 0.5){
+          line.x2 = Math.floor(Math.random()*canvas.width);
+          line.y2 = 0;  
+        }
+        else if (r < 0.75){
+          line.x2 = canvas.width;
+          line.y2 = Math.floor(Math.random()*canvas.height);  
+        }
+        else if (r < 1){
+          line.x2 = Math.floor(Math.random()*canvas.width);
+          line.y2 = canvas.height;  
+        }
+        //console.log("line = "+ line.x+", y="+ line.y+", x2="+line.x2+", y2="+line.y2);
+      }
+
+      function animate(){
+
+        ctx.beginPath();
+        ctx.moveTo(line.x, line.y);
+        ctx.lineTo(line.x2, line.y2);
+        ctx.strokeStyle = colorsGris[cant%100];
+        ctx.stroke();
+        
+        ctx.beginPath();
+        ctx.arc(line.x, line.y,3,0,2*Math.PI);
+        //ctx.fillStyle = colorsNaranja[Math.floor(Math.random()*100)];
+        ctx.fillStyle = colorsNaranja[cant%100];
+        ctx.fill();
+
+        cant ++;
+
+        if (cant <= max){
+          update();
+          requestAnimFrame(animate);
+        }
+        
+      }
+
+      function start(){
+        cant=0;
+        line = {x: 0, y: 50, x2:50, y2:0};
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        animate();
+      }
+
+      start();
+
+
+    </script>
+  </body>
+  </html>

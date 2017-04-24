@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Flow fields with perlin noise</title>
+
+  <style>
+  body {
+    background-color: #000;
+    margin: 0 auto;
+    overflow: hidden;
+    font-size: 14pt;
+    font-family: sans-serif;
+    color: #FFF
+  }
+
+  #canvas, #canvas2{
+    position: absolute;
+    margin: 0 auto;
+    width: 500px;
+    height: 500px;
+    background: transparent;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  </style>
+</head>
+
+<body>
+
+<canvas id="canvas2"></canvas>
+<canvas id="canvas"></canvas>
+<script src='../js/perlin.js'></script>
+<script src='../js/jquery-2.1.3.min.js'></script>
+<script>
+
+var canvas = document.getElementById('canvas');
+var ctx = canvas.getContext('2d');
+var canvas2 = document.getElementById('canvas2');
+var ctx2 = canvas2.getContext('2d');
+
+var image = ctx.createImageData(canvas.width, canvas.height);
+var data = image.data;
+
+var delta = 150;
+image = ctx.createImageData(canvas.width, canvas.height);
+data = image.data; 
+var particles = [];
+//we want 50 particles for every 100 pixels of screen available
+var numParticles = Math.floor(80*canvas.width/100);
+noise.seed(Math.random());
+var imageReady = false;
+
+var Particle = function(){
+  this.x = 0;
+  this.y = 0;
+  this.vx = 0;
+  this.vy = 0;
+  this.age=0;
+  
+
+  this.init = function(){
+    this.maxLifeTime = Math.floor(5+Math.random()*10);
+    this.y = canvas.height-100 + Math.random()*100;
+    this.x = Math.random()*canvas.width;
+    this.vx = 5;
+    this.vy = Math.random()*3;
+    this.color= "rgba(0,0,0,0)";
+    this.needsColorSet = true;
+  }
+
+  this.update = function(value){
+    this.age += 0.1;
+    this.y -= this.vx;
+    this.x += value*this.vx;
+
+    if(this.x < 0){
+      this.x = canvas.width;
+    }else if(this.x > canvas.width){
+      this.x = 0;
+    }
+
+    if(imageReady && this.needsColorSet){
+      this.needsColorSet = false;
+      this.setColor();
+      
+      //console.log(this.color); 
+    }
+
+    if(this.y < 0){
+      //this.y = canvas.height;
+      this.init();
+    }else if(this.y > canvas.height)
+    {
+      this.y = 0;
+    }
+
+    if(this.age >= this.maxLifeTime){
+      this.age = 0;
+      this.setColor();
+    }
+  }
+
+  this.setColor = function(){
+    var pixelData = ctx2.getImageData(this.x, this.y, 1, 1).data;
+      var r = pixelData[0];
+      var g = pixelData[1];
+      var b = pixelData[2];
+      this.color = "rgba("+r+", "+g+", "+b+",255)";
+  }
+
+  this.init();
+}
+
+function drawFrame() {
+  //ctx.globalAlpha = 0.05
+  //ctx.drawImage(img,0,0);
+  //ctx.fillStyle="rgba(255,255,255,0.1)";
+ //ctx.fillRect(0,0,canvas.width, canvas.height);
+  //ctx.clearRect(0,0,canvas.width, canvas.height);
+  ctx.globalAlpha = 1
+  
+  for(var i=0; i<numParticles; i++){
+    var particle = particles[i];
+    var value = noise.perlin2(Math.floor(particle.x)/delta , Math.floor(particle.y)/delta);
+
+    if(particle.age >= particle.maxLifeTime-0.1){
+      //ctx.fillStyle="#0CC";
+    }else{
+      var w = Math.floor((particle.maxLifeTime / particle.age)*10);
+      //var style = "rgba(0,0,0,"+w+")";
+      ctx.fillStyle = particle.color;
+    }
+    
+    ctx.fillRect(particle.x,particle.y, 2, 2);
+    particle.update(value);
+  }
+
+  requestAnimationFrame(drawFrame);
+}
+
+function restart(){
+  //Give a new seed to the noise function, to get a different pattern
+  noise.seed(Math.random());
+  particles = [];
+
+  for(var i=0; i<numParticles; i++){
+    particles.push(new Particle());
+  }
+  
+}
+
+function resize(){
+  // canvas.width = window.innerWidth;
+  // canvas.height = window.innerHeight;
+  // canvas2.width = window.innerWidth;
+  // canvas2.height = window.innerHeight;
+  image = ctx.createImageData(canvas.width, canvas.height);
+  data = image.data; 
+
+  //we want 50 particles for every 100 pixels of screen available
+  numParticles = 100;//Math.floor(100*canvas.width/100);
+  restart();
+}
+
+$(window).resize(function() {
+  resize();
+  restart();
+});
+
+/*To start we first call the function resize() to set the appropiate width and height, 
+then we start the animation loop*/
+resize();
+requestAnimationFrame(drawFrame);
+
+var img = new Image();   // Create new img element
+img.addEventListener("load", function() {
+  
+ctx2.drawImage(img,0,0, canvas.width, canvas.height);
+imageReady = true;
+
+}, false);
+img.src = 'alex.jpg'; // Set source path
+
+</script>
+</body>

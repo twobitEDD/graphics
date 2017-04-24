@@ -1,0 +1,122 @@
+<html>
+<head>
+	<title>Boids I </title>
+	<style type="text/css">
+		body{
+			font-family: 'Open Sans', 'Verdana', 'Monospaced';
+			margin: 0 auto;
+			overflow: hidden;
+			color: #fff;
+		}
+		div{
+			position: absolute;
+			bottom: 0;
+			left: 0;
+			height: 30px;
+		}
+	</style>
+
+	<script type="text/javascript" src="../js/geom.js"></script>
+	<script type="text/javascript" src="../js/Boids.js"></script>
+
+</head>
+
+<body>
+	
+	<canvas id="myCanvas"></canvas>
+	<div>Click to restart</div>
+
+	<script type="text/javascript">
+
+		var flock = null;
+		var done = false;
+		var Width = window.innerWidth,
+		Height = window.innerHeight;
+		var margin = 50;
+
+		function start()
+		{
+			var canvas = document.getElementById("myCanvas");
+			ctx = canvas.getContext("2d");
+			canvas.width = Width;
+			canvas.height = Height;
+
+			flock = new flocking();
+			flock.init(500, Width, Height, 12, 100, 100, 10);
+			done = false;
+		}
+
+
+		function draw(){
+			var boids = flock.getBoids();
+
+			ctx.fillStyle = "rgba(30,30,30,0.2)";
+			ctx.strokeStyle = "rgba(230,230,230,1)";
+			ctx.fillRect(0, 0, Width, Height); 
+			ctx.beginPath();
+			ctx.lineWidth = 1;
+
+			for (var i = 0; i < boids.length; i++) 
+			{
+				var b = boids[i];
+				ctx.moveTo(b.pos.x, b.pos.y);
+				var t = b.tail.length;
+				for(var j = 0; j < t; j++)
+				{
+					var p = b.tail[j];
+					var x = p.x;
+					var y = p.y;
+					ctx.quadraticCurveTo(p.x, p.y, 0.5 * (x + p.x), 0.5 * (y + p.y));
+				}
+
+				if(b.pos.x < 0  || b.pos.x > Width) {
+					done=true; 
+				}
+
+				else if(b.pos.y > Height-margin || b.pos.y < margin) { 
+					done=true;
+				}
+
+			}
+
+			ctx.stroke();
+			ctx.closePath();
+
+		}
+
+
+		function animate() {
+			flock.update();
+			draw();
+			if(!done){
+				requestAnimFrame(animate);
+			}
+		}
+
+		window.requestAnimFrame = (function(){
+			return  window.requestAnimationFrame       || 
+			window.webkitRequestAnimationFrame || 
+			window.mozRequestAnimationFrame    || 
+			window.oRequestAnimationFrame      || 
+			window.msRequestAnimationFrame     ||  
+			function( callback ){
+				window.setTimeout(callback, 1000 / 60);
+			};
+		})();
+
+		window.addEventListener( 'click', onWindowClick, false );
+
+		function onWindowClick(){
+			if(done){
+				start();
+				requestAnimFrame(animate);
+			}
+		}
+
+		start();
+		animate();
+
+	</script>
+
+
+</body></html>

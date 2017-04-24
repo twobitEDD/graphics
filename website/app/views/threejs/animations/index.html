@@ -1,0 +1,75 @@
+<html>
+
+<head>
+  <title>css animations</title>
+  <style type="text/css">
+
+  @keyframes revealTitle { 
+    from { opacity: 0; margin-top:-100px; } 
+    to {   opacity: 100; margin-top: 200px; }  
+  }
+
+  @keyframes revealButtons { 
+    from { opacity: 0;  } 
+    to {   opacity: 100;  }  
+  }
+
+  h1{
+    margin-top: 200px;
+    animation: 0.5s ease-in-out 0s revealTitle;
+    text-align: center;
+    font-size: 42pt;
+    font-weight: lighter;
+    font-family: "Segoe ui", "Open Sans", sans-serif;
+  }
+
+  .buttons{
+    margin-top: 200px;
+    animation: 0.75s ease-in 0s revealButtons;
+    text-align: center;
+  }
+
+  .buttons a{
+    text-decoration: none;
+    font-size: 16pt;
+    border: 1px solid #111;
+    padding: 5px 10px;
+    display: inline-block;
+    text-align: center;
+    font-weight: lighter;
+    font-family: "Segoe ui", "Open Sans", sans-serif;
+    margin: 0 10px;
+    cursor: pointer;
+  }
+
+  .github{
+    border: 3px solid #0079D1;
+  }
+
+  .ai{
+    border: 3px solid #5C2F8F;
+  }
+
+  .documentation{
+    border: 3px solid #00ABEC;
+  }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="main">
+
+    <h1>Application Insights for Developers</h1>
+
+    <div class="buttons">
+      <a class="ai"> Try Ai</a>
+      <a class="documentation"> Documentation </a>
+      <a class="github"> Git Hub </a>
+    </div>
+   
+</div>
+
+</body>
+</html>
