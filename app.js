@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 
 var index = require('./routes/index');
 var webglroute = require('./routes/webgl');
+var canvasroute = require('./routes/canvas');
 
 var app = express();
 
@@ -23,7 +24,8 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', index);
-app.use('/3d/', webglroute);
+app.use('/webgl/', webglroute);
+app.use('/canvas/', canvasroute);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
