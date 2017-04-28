@@ -13,7 +13,7 @@ router.get('/:experiment', function (req, res, next) {
         res.render('webgl/cube',
             {
                 title: 'blackpolygon - cube',
-                scriptPath: '../scripts/webgl/cube.js'
+                scriptPaths: ['../scripts/randomColor.js', '../scripts/webgl/cube.js']
             });
     }
     next();

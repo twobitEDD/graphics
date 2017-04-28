@@ -1,6 +1,6 @@
 extends webgllayout
 
 block content
-  h1= title
-  p Experiment CUBE #{title}
-  script(src= scriptPath)
+  each scriptPath in scriptPaths
+    script(src= scriptPath)
+
