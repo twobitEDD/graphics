@@ -1,17 +1,68 @@
+html, body { height: 100% }
+
 body {
-  padding: 50px;
+  padding: 0;
+  margin: 0;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  background: #f0f0f0;
+}
+
+canvas{
+  position: absolute;
+  top:0;
+  left:0;
+  z-index:-1;
+}
+
+.container{
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.hero {
+  background: #222;
+  width: 500px;
+  padding: 20px 50px;
+}
+
+.experiments {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+h1{
+  font-family: 'Roboto Slab', serif;
+  margin: 0;
+  font-size: 50px;
+  color: #F5f5f5;
+  font-weight: normal;
+}
+
+h2{
+  font-family: 'Roboto Slab', serif;
+  font-weight: 200;
+  margin: 0;
+  font-size: 50px;
+  color: #222;
+}
+
+p{
+  font-size: 18px;
+  color: #da00e0;
+  margin-bottom: 0;
 }
 
 a {
-  color: #00B7FF;
+  color: #4f2db5;
   text-decoration: none;
 }
 
-a:hover {
+.experiments a:hover {
   text-decoration: underline;
 }
 
 .button{
-   color: #00B7FF;
+   margin: 88px 20px 0;
 }

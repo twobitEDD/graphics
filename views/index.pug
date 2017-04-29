@@ -1,14 +1,19 @@
 extends layout
 
 block content
-  h1= title
-  p Experiments with javscript and procesural art
+  canvas#canvas
+  .container
+    .hero
+      a(href='https://www.instagram.com/blackpolygon/')
+        h1 blackpolygon
+      p Experiments with javscript and procedural art
 
-  a(class='button', href='https://www.instagram.com/blackpolygon/') Ig
+    .experiments
+      a(class='button', href='/isthisart') 
+        h2 is this art?
+      a(class='button', href='/webgl') 
+        h2 webgl 
+      a(class='button', href='/canvas') 
+        h2 canvas 
 
-
-  ul
-    li 
-      a(class='button', href='/webgl') webgl 
-    li 
-      a(class='button', href='/canvas') canvas 
+    script(src='scripts/canvas/index.js')
