@@ -2,10 +2,16 @@ var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 var particleCount = 70,
     particles = null,
-    minDist = 200;
+    minDist = 200,
+    dark = false;
 
 function clearCanvas() {
-    ctx.fillStyle = "#f5f5f5";
+
+    if (dark) {
+        ctx.fillStyle = "#131213";
+    } else {
+        ctx.fillStyle = "#f5f5f5";
+    }
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
@@ -45,6 +51,11 @@ function onWindowClick() {
     }
 }
 
+function onWindowDblClick() {
+    dark = !dark;
+    console.log(dark);
+}
+
 function onWindowResize() {
     setSizes();
     init();
@@ -59,13 +70,13 @@ function update() {
         p.x += p.vx;
         p.y += p.vy
 
-        if (p.x > canvas.width){
+        if (p.x > canvas.width) {
             p.x = 0;
         } else if (p.x < 0) {
             p.x = canvas.width;
         }
 
-        if (p.y > canvas.height){
+        if (p.y > canvas.height) {
             p.y = 0;
         } else if (p.y < 0) {
             p.y = canvas.height;
@@ -86,11 +97,9 @@ function distance(p1, p2) {
     dist = Math.floor(Math.sqrt(dx * dx + dy * dy));
 
     if (dist <= minDist) {
-
-        var color = "rgba(30,50,50," + (1.0 - dist / minDist) + ")";
-        var r = dist;
-        var g = dist % 100;
-        var b = dist % 255;
+        var r = dark ? dist % 25 : dist;
+        var g = dark ? dist : dist % 100;
+        var b = dark ? dist : dist % 255;
         var color = "rgba(" + r + "," + g + "," + b + "," + (1.0 - dist / minDist) + ")";
         ctx.beginPath();
         ctx.strokeStyle = color;
@@ -116,6 +125,7 @@ window.requestAnimFrame = (function () {
 })();
 
 window.addEventListener('click', onWindowClick, false);
+window.addEventListener('dblclick', onWindowDblClick, false);
 window.addEventListener('resize', onWindowResize, false);
 
 setSizes();

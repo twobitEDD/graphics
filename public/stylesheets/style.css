@@ -55,14 +55,18 @@ p{
 }
 
 a {
-  color: #4f2db5;
   text-decoration: none;
 }
 
 .experiments a:hover {
-  text-decoration: underline;
+  background: #4f2db5;
+}
+
+.experiments a:hover h2 {
+  color: #fff;
 }
 
 .button{
-   margin: 88px 20px 0;
+   margin: 76px 10px 0;
+   padding: 0px 10px;
 }
