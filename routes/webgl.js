@@ -15,6 +15,13 @@ router.get('/:experiment', function (req, res, next) {
                 title: 'ico',
                 scriptPaths: ['../scripts/randomColor.js', '../scripts/webgl/ico.js']
             });
+    } else if (req.params.experiment === "rotatingshapes") {
+        res.render('webgl/ico',
+            {
+                title: 'rotatingshapes',
+                scriptPaths: ['../scripts/TrackballControls.js','../scripts/jquery-2.1.3.min.js',
+                '../scripts/randomColor.js','../scripts/tinycolor.js','../scripts/webgl/rotatingshapes.js']
+            });
     }
     next();
 
