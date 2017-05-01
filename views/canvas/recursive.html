@@ -1,0 +1,289 @@
+<html>
+
+<head>
+	<title>Recursive polygons</title>
+	<meta content="Recursive drawing, polygons, canvas, js, creative coding, generative art, genart" name="keywords">
+	<meta content="Drawing recursive poygons using javascritp and canvas." name="description">
+	<meta property="og:image" content="http://jlchapa.azurewebsites.net/img/polygon.png" />
+	
+	<style>
+		body{
+			font-family: 'Open Sans', 'Verdana', 'Monospaced';
+			margin: 0 auto;
+			overflow: hidden;
+			color: #555;
+			font-size: 12px;
+		}
+
+		div{
+			position: absolute;
+			top: 0px;
+			left: 0px;
+			width: 450px;
+			padding: 20px;
+		}
+		h1{
+			font-weight: 200;
+			font-size: 20pt;
+			margin: 5px 0;
+		}
+		a{
+			text-decoration: none;
+			background-color: #0078e7;
+			padding: 2px 5px;
+			border-radius: 3px;
+			border:none;
+			margin-top: 10px;
+			display: inline-block;
+			color: #fff;
+		}
+
+		a:hover{
+			background-color: #1f8dd6;
+			cursor: pointer;
+		} 
+
+		a:visited{
+			color: #fff;
+		}
+
+		span{
+			font-size: 12px;
+		}
+
+	</style>
+
+	<script src="../js/jquery-2.1.3.min.js"></script>
+	<script src="../js/fileSaver.js"></script>
+	<script src="../js/ga.js"></script>
+</head>
+
+<body>
+
+	<canvas id="canvas"></canvas>
+	<div>
+		<h1>Recursive polygons</h1>
+		<p>Draw a polygon of n sides with a radius r <br/>
+			at the center of the screen, decrement r and<br/>
+			repeat on each vertex until r is too small or depth is reached. 
+		</p>
+		<a onclick="less()">-</a> <a id="reset" onclick="reset()"> 4 </a> <a onclick="more()">+</a> <span>Number of sides </span> 
+		<br/>
+		<a onclick="lessD()">-</a> <a id="resetD" onclick="resetD()"> 2 </a> <a onclick="moreD()">+</a> <span>Depth </span>
+		<br/>
+		<a href="#" onclick="save()" id="download">Save as image</a> <br/>
+		<br/>
+		<label><input type="checkbox" id="toggleAnimation" value="1" checked="checked" /> Animation</label>
+		<br/><br/>
+		<label> <input type='range' id="radius" min='80' value='80' max='900' step='5' onchange="updateRadius(value)"/>  Radius </label>
+		<br/>
+	</div>
+	<script>
+
+		var canvas  = document.getElementById('canvas');
+		canvas.width = window.innerWidth;
+		canvas.height = window.innerHeight;
+
+		var ctx = canvas.getContext('2d');
+		ctx.lineWidth = 0.5;
+		ctx.strokeStyle = "#111";
+
+		var centerX = Math.floor(canvas.width/2);
+		var centerY = Math.floor(canvas.height/2);
+		      var cant = 13; //Sides of the polygon
+		      var depth = 2; // Number of recursive calls
+		      var pi180 = Math.PI/180;  //Helper to convert angle to radians
+		      var frameCount = 0;
+		      var noise = 0;
+		      var initRadius = 80;
+
+		      var showAnimation = true;
+
+		      var link = document.getElementById('download');
+		      console.log("Protip: See it in fullscreen and use the image as wallpaper.");
+
+		      function save(){
+		      	if(canvas.toBlob == undefined){
+		      		link.href = canvas.toDataURL();
+		      		link.download = "polygons.png";
+		      	}else{
+		      		canvas.toBlob(function(blob) {
+		      			saveAs(blob, "polygons.png");
+		      		});
+		      	}
+		      }
+
+		      function dibujaR(x, y, n, r, depth){
+
+		      	if( r<20 || depth < 1) return;
+
+		      	var i = 0;
+		      	var newR = Math.floor(r/1.8);
+		      	for(i=0; i<n; i++){
+			    //We want to evenly distribute n polygons 
+			    //in the circumference of an imaginary circle of radius r
+
+			    var angle = (360/n) * i * pi180;
+			    var x2 = r * Math.cos(angle);
+			    var y2 = r * Math.sin(angle);
+
+			    var newX = x+x2;
+			    var newY = y+y2;
+
+			    //To move the polygons
+			    if(newX > centerX){
+			    	newX += noise;
+			    }else{
+			    	newX -= noise;
+			    }
+
+			    if(newY > centerY){
+			    	newY += noise;
+			    }else{
+			    	newY -= noise;
+			    }
+
+			    if(n>=3){
+			    	drawPolygon(newX, newY, n, r);
+			    }else{
+			    	ctx.beginPath();
+			    	ctx.arc(newX, newY, r, 0, 2*Math.PI);
+			    	ctx.stroke();
+			    	ctx.closePath();	
+			    }
+			    
+			    dibujaR(newX, newY, n, newR, depth-1);
+			}
+		}
+
+		function easeInCubic(t) { return t*t*t };
+
+
+		function drawPolygon(x, y, sides, radius){
+			var i = 0;
+			var angle = (360/sides) * i * pi180;
+			var x1 = radius * Math.cos(0);
+			var y1 = radius * Math.sin(0);
+			ctx.beginPath();
+			ctx.moveTo(x+x1, y+y1);
+
+
+			for(i=1; i<sides; i++){
+	            //We want to evenly distribute n points
+	            //in the circumference of an imaginary circle of radius r
+	            var angle = (360/sides) * i * pi180;
+	            var x2 = radius * Math.cos(angle);
+	            var y2 = radius * Math.sin(angle);
+
+	            var newX = x+x2;
+	            var newY = y+y2;
+
+	            ctx.lineTo(newX, newY);
+	        }
+
+	        ctx.lineTo(x+x1, y+y1);
+	        ctx.stroke();
+	    }
+
+
+	    function animate(){
+
+	    	noise = 0;
+	    	if(showAnimation){
+	    		frameCount += 1;
+	    		noise = easeInCubic(Math.sin(0.005*frameCount)*3);
+	    		if(noise<0) noise = 0;
+	    	}
+	    	clearAndDraw();
+
+	    	if(showAnimation) requestAnimFrame(animate);	
+	    }
+
+	    function clearAndDraw(){
+	    	ctx.fillStyle = "#F0F0F0";        
+	    	ctx.fillRect(0, 0, canvas.width, canvas.height);
+	    	dibujaR(centerX, centerY, cant, initRadius, depth);
+	    }
+
+	    function more(){
+	    	if(cant < 15){
+	    		cant += 1;
+	    	}   	
+	    	updateCant();
+	    }
+
+	    function reset(){
+	    	cant = 2;
+	    	updateCant();
+	    }
+
+	    function less(){
+	    	if(cant>0){
+	    		cant -= 1;
+	    	}
+	    	updateCant();
+	    }
+
+	    function moreD(){
+	    	if(depth<10){
+	    		depth += 1;
+	    	}	
+	    	updateCant();
+	    }
+
+	    function resetD(){
+	    	depth = 2;
+	    	updateCant();
+	    }
+
+	    function lessD(){
+	    	if(depth>1){
+	    		depth -= 1;
+	    	}
+	    	updateCant();
+	    }
+
+	    function updateCant(){
+	    	$("#reset").html(cant);
+	    	$("#resetD").html(depth);
+	    	if(!showAnimation){
+	    		animate();
+	    	}
+	    }
+
+	    function updateRadius(r){
+	    	initRadius = r;
+	    	if(!showAnimation){
+	    		animate();
+	    	}
+	    }
+
+	    $("#toggleAnimation").change(function() {
+	    	
+	    	if(!showAnimation){
+	    		showAnimation = true;
+	    		animate();
+	    	}else{
+	    		showAnimation = false;
+	    	}
+	    });
+
+    // RequestAnimFrame: a browser API for getting smooth animations
+    window.requestAnimFrame = (function(){
+    	return window.requestAnimationFrame       || 
+    	window.webkitRequestAnimationFrame || 
+    	window.mozRequestAnimationFrame    || 
+    	window.oRequestAnimationFrame      || 
+    	window.msRequestAnimationFrame     ||
+    	function( callback ){
+    		window.setTimeout(callback, 1000/60);
+    	};
+    })();
+
+
+    updateCant();
+    animate();
+
+</script>
+</body>
+</html>

@@ -1,5 +1,3 @@
-console.log("All the webgl code goes here!");
-
 var container;
 var camera, scene, renderer;
 var shapes = [];

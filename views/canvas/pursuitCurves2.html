@@ -1,0 +1,193 @@
+<html>
+
+<head>
+  <title>Pursuit Curves</title>
+  <meta content="Pursuit Curves, canvas, js, creative coding, generative art, genart" name="keywords">
+  <meta content="Draw a pursuit curve on the canvas" name="description">
+  <meta property="og:image" content="http://jlchapa.azurewebsites.net/img/pursuitcurves.png" />
+  <style>
+    body{
+      font-family: 'Open Sans', 'Verdana', 'Monospaced';
+      margin: 0 auto;
+      overflow: hidden;
+      color: #fff;
+    }
+
+    div{
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      width: 200px;
+      padding: 20px;
+    }
+    h1{
+      font-weight: 200;
+      font-size: 20pt;
+      margin: 5px 0;
+    }
+    a{
+      text-decoration: none;
+      background-color: #0078e7;
+      font-size: 14pt;
+      padding: 5px 10px;
+      border-radius: 3px;
+      border:none;
+      margin-top: 10px;
+      display: inline-block;
+      color: #fff;
+    }
+
+    a:hover{
+      background-color: #1f8dd6;
+    } 
+
+    a:visited{
+      color: #fff;
+    }
+
+  </style>
+
+  <script src="../js/randomColor.js"></script>
+  <script src="../js/fileSaver.js"></script>
+  <script src="../js/ga.js"></script>
+  
+</head>
+
+<body>
+
+  <canvas id="canvas"></canvas>
+  <!-- <div>
+    <h1>Pursuit Curves</h1>
+    <a href="#" onclick="save()" id="download">Save as image</a> <br/>
+  </div> -->
+
+  <script>
+        /* Curvas de persecución
+           Se presenta la solución al "problema de las tortugas/ratones/etc" de 
+           manera analítica así como de manera numérica.
+           Los parámetros modificables son el número de lados n del polígono, la
+           velocidad Vel de los móviles, la distancia radial inicial radius y el ángulo
+          incial Theta0 con respecto al eje.
+          */
+          var canvas  = document.getElementById('canvas');
+          canvas.width = window.innerWidth;
+          canvas.height = window.innerHeight;
+          var ctx = canvas.getContext('2d');
+          ctx.lineWidth = 1;
+          ctx.fillStyle = "#000";
+          ctx.strokeStyle = randomColor();
+
+          var centerX = Math.floor(canvas.width/2);
+          var centerY = Math.floor(canvas.height/2);
+        var pi180 = Math.PI/180;  //Helper to convert angle to radians
+        var link = document.getElementById('download');
+        console.log("Protip: See it in fullscreen and use the image as wallpaper.");
+        var n = Math.floor(Math.random()*5 +3);        // Lados del polígono
+        console.log(n);
+        var Vel = -1;     // Velocidad en [m/s]
+        var dt = 1/5;
+        var N = 50;
+        var posiciones = [[]];
+        var size = 200; //size of the square for each repetition
+        var radius = size-20;      // Radio inicial en [m]
+        var cantX = canvas.width/size;
+        var cantY = canvas.height/size;
+        
+        
+        function save(){
+          if(canvas.toBlob == undefined){
+            link.href = canvas.toDataURL();
+            link.download = "spiro.png";
+          }else{
+            canvas.toBlob(function(blob) {
+              saveAs(blob, "spiro.png");
+            });
+          }
+        }
+
+
+        function drawPursuitCurves(){
+          var i, j, k,l;
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+          ctx.translate(size/2 +10, size/2 +10);
+          ctx.rotate((360/(n*2))*pi180);
+
+          //We are going to draw the first persecution curves manually
+          var firstX, firstY;          
+          for(j=0; j<N; j++){
+            ctx.beginPath();
+            var pos = posiciones[j];
+
+            for(i=0; i<n; i++){
+              var x = pos[i][0];
+              var y = pos[i][1];
+              //ctx.strokeStyle = randomColor();
+              //console.log(x,y);
+              ctx.lineTo(x, y);
+              if(i==0){
+                firstY=y;
+                firstX=x;  
+              }
+              
+            }
+            ctx.lineTo(firstX, firstY);
+            ctx.stroke();
+            ctx.closePath();
+          }
+
+          //Then we are going to copy the pixels of the first square of the canvas to the rest of the canvas applying some transformations
+          var imgData=ctx.getImageData(0,0,size,size);
+          
+          // for(k=0; k<cantX; k++){
+          //   for(l=0; l<cantY; l++){
+          //     //ctx.rotate(45*pi180);
+          //     ctx.putImageData(imgData,k*size,l*size);
+          //   }
+          // }
+        }
+
+        function calculatePositions(){
+
+          var i,j;
+          posiciones[0] = [];
+          for(i=0; i<n; i++){
+            var angle = (360/n) * i;
+            var x = radius * Math.cos(angle  * pi180);
+            var y = radius * Math.sin(angle  * pi180);
+            posiciones[0].push([x,y, angle]);
+          }
+
+          for(j=1; j<N; j++){
+            posiciones.push([]);
+            posiciones[j] = [];
+            for(i=0; i<n; i++){
+              var posAnt = posiciones[j-1];
+              var xA = posAnt[i][0];
+              var yA = posAnt[i][1];
+              var xB = 0;
+              var yB = 0;
+
+              if(i==n-1){
+                xB = posAnt[0][0];
+                yB = posAnt[0][1];
+              }else{
+                xB = posAnt[i+1][0];
+                yB = posAnt[i+1][1];
+              }
+
+              var x = xA + ((xA-xB) * (dt*Vel) );
+              var y = yA + ((yA-yB) * (dt*Vel) );
+
+              posiciones[j].push([x,y,0]);
+            }
+          }
+
+        }
+
+        calculatePositions();
+        drawPursuitCurves();
+
+      </script>
+    </body>
+    </html>

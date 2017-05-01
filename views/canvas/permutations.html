@@ -1,0 +1,153 @@
+<html>
+
+<head>
+  <title>Permutations</title>
+  <meta content="Recursive drawing, polygons, canvas, js, creative coding, generative art, genart" name="keywords">
+  <meta content="Permutations of n elements from a set" name="description">
+  <style>
+    body{
+      margin: 0 auto;
+      overflow: hidden;
+      background: #F0F0F0;
+      font-family: 'Source Sans Pro', sans-serif;
+    }
+
+    h1{
+      font-weight: 300;
+    }
+
+    div{
+      padding: 20px;
+    }
+
+  </style>
+  <script src="../js/permutations.js"></script>
+  <script src="../js/randomColor.js"></script>
+  <script src="../js/jquery-2.1.3.min.js"></script>
+  <script src="../js/ga.js"></script>
+  <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300' rel='stylesheet' type='text/css'>
+  
+  <head>
+
+    <body>
+
+      <div>
+        <h1> Permutations in a 3x3 grid </h1>
+        <p>Choose n items from a grid, with no repetition and no importance in the order.
+        </p>
+
+        Choose n <br/>
+          <input type='number'  value="2" step='1' min='0' max='9' onchange="update(this.value, -1)"/>  
+        <br/><br/>
+        Play with the square size <br/>
+          <input type='range' value="20" step='1' min='5' max='40' onchange="update(-1, this.value)"/> 
+
+      </div>
+
+      <canvas id="canvas"></canvas>
+
+      <script>
+
+        var squareSize = 20;
+        var margin = 10;
+      var n = 2;  // numero de cuadros que podemos seleccionar
+      var darkColor = "#1E1B18";
+      var brightColor = "#FC8600";
+
+      var canvas  = document.getElementById('canvas');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      var ctx = canvas.getContext('2d');
+
+      //Draw a grid in the canvas based on an array of 1s and 0s
+      function draw(data){
+
+        ctx.strokeStyle = '#FFF';
+        ctx.lineWidth = 1;
+
+        var i,j, index = 0;
+
+        for(i=0; i < 3; i++){
+          for(j=0; j < 3; j++){
+            x0 = j*squareSize;
+            y0 = i*squareSize;
+
+            var r = Math.random();
+            if(data[index] == 0){
+              ctx.fillStyle = darkColor;
+            }else{
+              ctx.fillStyle = brightColor;
+            }
+
+            ctx.fillRect(x0, y0, squareSize, squareSize);
+            ctx.strokeRect(x0, y0, squareSize, squareSize);
+
+            index++;  
+          }
+        } 
+      }
+
+      //Converts the random selected numbers to the array of zeros and ones
+      function convert(randomData){
+        var data = [];
+
+        var len = randomData.length;
+        var i = 0;
+        for(; i<len; i++){
+          var d = randomData[i];
+          var nd = new Array(9+1).join('0').split('').map(parseFloat);
+
+          var j = 0;
+          var len2 = d.length;
+          for(;j<len2;j++){
+            nd[d[j]] = 1;
+          }
+
+          data.push(nd);
+
+        }
+        return data;
+      }
+
+
+      function update(selectedNumber, size){
+
+        if(size != -1) squareSize = parseInt(size);
+        if(selectedNumber != -1) n = parseInt(selectedNumber);
+
+        var arr = [0,1,2,3,4,5,6,7,8];  // each number represents a slot in the grid
+        var results = permutations(arr, n);
+        console.log("N: " + n);
+        console.log("Possible permutations: " + results.length);
+        var data = convert(results);
+
+        //Clear the canvas
+        ctx.fillStyle = '#F0F0F0';
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        var transSize = squareSize*3 + margin;
+        var cantX = Math.floor(canvas.width / transSize);
+        var cont = 0;
+        var exists = true;
+
+        while(exists){
+          ctx.save();
+          for(z=0; z<cantX; z++){
+            draw(data[cont]);
+            ctx.translate(transSize,0);
+            cont ++;
+            if(cont >= data.length){ exists = false; break;}
+          }
+          ctx.restore();
+          ctx.translate(0,transSize);
+        }
+
+      }
+
+      update(-1,-1);
+
+
+    </script>
+  </body>
+  </html>

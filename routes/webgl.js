@@ -9,11 +9,11 @@ router.get('/', function (req, res, next) {
 router.get('/:experiment', function (req, res, next) {
     console.log(req.params.experiment);
 
-    if (req.params.experiment === "cube") {
-        res.render('webgl/cube',
+    if (req.params.experiment === "ico") {
+        res.render('webgl/ico',
             {
-                title: 'blackpolygon - cube',
-                scriptPaths: ['../scripts/randomColor.js', '../scripts/webgl/cube.js']
+                title: 'ico',
+                scriptPaths: ['../scripts/randomColor.js', '../scripts/webgl/ico.js']
             });
     }
     next();

@@ -28,10 +28,10 @@ app.use('/canvas/', canvasroute);
 
 // catch 404 render lost page
 app.use(function(req, res, next) {
-  var err = new Error('Not Found');
-  err.status = 404;
-  next(err);
+  var messages = ["Are you f*king lost?", "Learn how to type", "This is not a real page, step back and rethink your life.", "Page not found"];
+  var theMessage = messages[Math.floor(Math.random() * 3)];
   console.log(theMessage);
+  res.render('lost', {message: theMessage });
 });
 
 // error handler
