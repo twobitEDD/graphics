@@ -15,7 +15,38 @@ router.get('/:experiment', function (req, res, next) {
                 title: 'ico',
                 scriptPaths: ['../scripts/randomColor.js', '../scripts/webgl/ico.js']
             });
-    } else if (req.params.experiment === "rotatingshapes") {
+    } else if (req.params.experiment === "squares") {
+        res.render('webgl/ico',
+            {
+                title: 'rotatingshapes',
+                scriptPaths: ['../scripts/randomColor.js', '../scripts/tinycolor.js', '../scripts/webgl/squares.js']
+            });
+    } 
+    else if (req.params.experiment === "pyramid") {
+        res.render('webgl/ico',
+            {
+                title: 'rotatingshapes',
+                scriptPaths: ['../scripts/randomColor.js', '../scripts/tinycolor.js', '../scripts/webgl/pyramid.js']
+            });
+    } 
+
+    else if (req.params.experiment === "blades") {
+        res.render('webgl/ico',
+            {
+                title: 'rotatingshapes',
+                scriptPaths: ['../scripts/randomColor.js', '../scripts/tinycolor.js', '../scripts/webgl/blades.js']
+            });
+    } 
+
+    else if (req.params.experiment === "light") {
+        res.render('webgl/ico',
+            {
+                title: 'rotatingshapes',
+                scriptPaths: ['../scripts/TrackballControls.js', '../scripts/randomColor.js', '../scripts/tinycolor.js', '../scripts/webgl/light1.js']
+            });
+    } 
+    
+    else if (req.params.experiment === "rotatingshapes") {
         res.render('webgl/ico',
             {
                 title: 'rotatingshapes',

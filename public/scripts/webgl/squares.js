@@ -1,9 +1,11 @@
 var container;
 var camera, scene, renderer;
 var shapes = [];
-var numShapes = 8;
+var numShapes = 20;
 var colors;
 var ico;
+
+var tc = null;
 
 window.onload = function(){
     init();
@@ -15,7 +17,8 @@ function init() {
     container = document.createElement('div');
     document.body.appendChild(container);
 
-    colors = randomColor({ count: 10, hue: 'red' });
+    colors = randomColor({ count: numShapes, hue: 'blue' });
+    tc = tinycolor(colors[0]);
 
     scene = new THREE.Scene();
 
@@ -30,36 +33,36 @@ function init() {
     l1.position.set(0, 0, -100);
     scene.add(l1);
 
-    var l2 = new THREE.PointLight("#cdcdcd", 1, 100);
+    var l2 = new THREE.PointLight("#cdcdcd", 1, 1000);
     l2.position.set(-50, 50, 0);
     scene.add(l2);
 
-    var l3 = new THREE.PointLight("#cdcdcd", 1, 100);
+    var l3 = new THREE.PointLight("#cdcdcd", 1, 1000);
     l3.position.set(50, 50, 0);
     scene.add(l3);
 
-    var l4 = new THREE.PointLight("#cdcdcd", 1, 100);
+    var l4 = new THREE.PointLight("#cdcdcd", 1, 1000);
     l4.position.set(0, 0, 50);
     scene.add(l4);
 
-    var l5 = new THREE.PointLight("#cdcdcd", 1, 100);
+    var l5 = new THREE.PointLight("#cdcdcd", 1, 1000);
     l5.position.set(0, -50, 50);
     scene.add(l5);
 
-    var c = new THREE.Color("#a03000");
-    var c2 = new THREE.Color("#EDAD00");
+    var c = new THREE.Color("#003893");
+    var c2 = new THREE.Color("#00B2FF");
     var pinkMat = new THREE.MeshPhongMaterial({
         color: c,
         emissive: c,
         specular: c2,
-        shininess: 50,
-        shading: THREE.FlatShading,
-        transparent: 1,
+        shininess: 70,
+        //shading: THREE.FlatShading,
+        //transparent: 1,
         opacity: 1
     });
 
-    ico = new THREE.Mesh(new THREE.IcosahedronGeometry(5, 0), pinkMat);
-    var s = 3;
+    ico = new THREE.Mesh(new THREE.BoxGeometry(1,1,1), pinkMat);
+    var s = 20;
     ico.scale.set(s, s, s);
     ico.rotation.y = 0.5;
     scene.add(ico);
@@ -67,10 +70,10 @@ function init() {
     for (var i = 0; i < numShapes; i++) {
 
 
-        var material = new THREE.MeshLambertMaterial({ color: colors[i], wireframe: true, side: THREE.DoubleSide });
+        var material = new THREE.MeshLambertMaterial({ color: tinycolor("#003893").brighten(i*3).toString(), wireframe: true, side: THREE.DoubleSide });
 
-        shapes[i] = new THREE.Mesh(new THREE.IcosahedronGeometry(5, 0), material);
-        var s = 5 + (2 * i * i / 3);
+        shapes[i] = new THREE.Mesh(new THREE.BoxGeometry(1,1,1), material);
+        var s = 25 + (8 * i);
         shapes[i].scale.set(s, s, s);
         scene.add(shapes[i]);
     }
@@ -102,12 +105,13 @@ function render() {
 
     ico.rotation.x += 0.01;
     ico.rotation.y += 0.01;
-    var w = 3 + 0.4 * Math.sin(x);
+    var w = 20 + 0.4 * Math.sin(x);
     ico.scale.set(w, w, w);
 
     for (var i = 0; i < numShapes; i++) {
-        shapes[i].rotation.y += 0.002 + 0.002 * (numShapes);
-        shapes[i].rotation.z += -0.002 + 0.002 * (numShapes);
+        //shapes[i].rotation.y += 0.001 + 0.001 * i;
+        shapes[i].rotation.x += 0.002 + 0.002 * i;
+        //shapes[i].rotation.z += -0.002 + 0.002 * (numShapes);
         //shapes[i].scale.multiplyScalar(10+Math.abs(Math.sin(y)));
     }
 
