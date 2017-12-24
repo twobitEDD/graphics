@@ -1,0 +1,79 @@
+<html>
+
+<head>
+    <title>Sound</title>
+    <meta content="Sound, canvas, js, creative coding, generative art, genart" name="keywords">
+    <meta content="." name="description">
+
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.16/p5.min.js'></script>
+    <script src="/scripts/p5/p5.sound.js"></script>
+
+    <style>
+        body {
+            font-family: 'Open Sans', 'Verdana', 'Monospaced';
+            margin: 0 auto;
+            overflow: hidden;
+            color: #fff;
+        }
+    </style>
+
+    <head>
+
+        <body>
+
+            <canvas id="canvas"></canvas>
+            <div>
+                <h1>Sound</h1>
+                <a href="#" onclick="less()">-</a>
+                <br/>
+            </div>
+            <script>
+
+                var canvas, ctx, w2, mic, h2, fft, spectrum, waveform;
+
+
+                function setup() {
+                    canvas = document.getElementById('canvas');
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                    ctx = canvas.getContext('2d');
+                    ctx.lineWidth = 1;
+                    w2 = window.innerWidth / 2;
+                    h2 = window.innerHeight / 2;
+
+                    mic = new p5.AudioIn()
+                    mic.start();
+                    fft = new p5.FFT(0.8);
+                    fft.setInput(mic);                    
+                }
+
+                function draw() {
+                    ctx.fillStyle = "rgba(0,0,0, 0.1)";
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                    var micLevel = mic.getLevel();
+
+                    var radius = map(micLevel, 0.0, 1, 10, w2);
+
+                    ctx.lineWidth = 0.5;
+                    ctx.strokeStyle = "#00FFBB";
+                    ctx.beginPath();
+                    ctx.arc(w2, h2, radius, 0, 2 * Math.PI);
+                    ctx.stroke();
+                    ctx.closePath();
+
+                    ctx.fillStyle = "#750"; 
+                    spectrum = fft.analyze();
+
+                    for (var i = 0; i < spectrum.length; i++) {
+                        var x = map(i, 0, spectrum.length, 0, canvas.width);
+                        var h = -canvas.height + map(spectrum[i], 0, 255, canvas.height, 0);
+                        ctx.fillRect(x, canvas.height, canvas.width / spectrum.length, h);
+                    }
+
+                }
+
+            </script>
+        </body>
+
+</html>
