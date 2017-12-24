@@ -5,6 +5,7 @@ body {
   margin: 0;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
   background: #f0f0f0;
+  color: #121212;
 }
 
 canvas{
@@ -36,8 +37,11 @@ h1{
   font-family: 'Roboto Slab', serif;
   margin: 0;
   font-size: 50px;
-  color: #F5f5f5;
   font-weight: normal;
+}
+
+.hero h1{
+  color: #F5f5f5;
 }
 
 h2{

@@ -53,7 +53,6 @@ function onWindowClick() {
 
 function onWindowDblClick() {
     dark = !dark;
-    console.log(dark);
 }
 
 function onWindowResize() {
