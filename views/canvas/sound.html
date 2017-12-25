@@ -15,6 +15,12 @@
             overflow: hidden;
             color: #fff;
         }
+
+        div {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
     </style>
 
     <head>
@@ -24,12 +30,13 @@
             <canvas id="canvas"></canvas>
             <div>
                 <h1>Sound</h1>
-                <a href="#" onclick="less()">-</a>
+                <span id="energy"></span>
                 <br/>
             </div>
             <script>
 
-                var canvas, ctx, w2, mic, h2, fft, spectrum, waveform;
+                var canvas, ctx, w2, mic, h2, fft, spectrum, waveform, stopped= false;
+                var energySpan = document.getElementById("energy");
 
 
                 function setup() {
@@ -44,33 +51,91 @@
                     mic = new p5.AudioIn()
                     mic.start();
                     fft = new p5.FFT(0.8);
-                    fft.setInput(mic);                    
+                    fft.setInput(mic);
+
+                   // var c = color('magenta');
+                    //console.log(c.toString());
                 }
 
                 function draw() {
-                    ctx.fillStyle = "rgba(0,0,0, 0.1)";
+                    var micLevel = mic.getLevel();
+                    var radius = map(micLevel, 0.0, 1, 10, w2);
+
+                    var gray = map(micLevel, 0.0, 1, 0, 500);
+
+                    var c = color(gray);
+                    c.setAlpha(25.6);
+                    // console.log(c.toString());
+                    ctx.fillStyle = c.toString();//"rgba(0,0,0, 0.1)";
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                    var micLevel = mic.getLevel();
+                    //ctx.fillStyle = "#750";
+                    spectrum = fft.analyze();
 
-                    var radius = map(micLevel, 0.0, 1, 10, w2);
+                    // for (var i = 0; i < spectrum.length; i++) {
+                    //     var x = map(i, 0, spectrum.length, 0, canvas.width);
+                    //     var h = -canvas.height + map(spectrum[i], 0, 255, canvas.height, 0);
+                    //     ctx.fillRect(x, canvas.height, canvas.width / spectrum.length, h);
+                    // }
+                    // var energy = 'Energy: ';
+                    var cantRows = 20;
+                    var cantCols = 5;
+
+                    var energySlots = 100;
+                    for (var i = 0; i < energySlots; i++) {
+                        var freq = (spectrum.length / energySlots) * i;
+                        var e = fft.getEnergy(freq);
+
+                        // energy += ' ' + freq + ': ' + e + ' ,';
+                        var red = 155 + i;
+                        var blue = 255;
+                        ctx.strokeStyle = "rgba(" + red + ", 0," + blue + ", 1)";
+                        ctx.beginPath();
+                        ctx.arc(w2, i * ((canvas.height - 50) / energySlots) + 25, e, 0, 2 * Math.PI);
+                        ctx.stroke();
+                        ctx.closePath();
+
+                        //paint on left side
+                        ctx.fillStyle = "#00FFBB";
+                        var colNumber = Math.floor(i/cantRows);
+                        var rowNumber = cantCols%i;
+
+                        var squareWidth = 10;
+                        var squareHeight = 10;
+
+                        // console.log(colNumber, rowNumber);
+
+                        ctx.fillRect(colNumber * squareWidth,
+                        rowNumber * squareHeight,
+                        10,10);
+
+
+                    }
+
+                    // energySpan.innerText = energy;
+
+                    let centroid = fft.getCentroid();
+
+                    var xpos = map(centroid, 0, 1024, 0, canvas.width);
 
                     ctx.lineWidth = 0.5;
                     ctx.strokeStyle = "#00FFBB";
                     ctx.beginPath();
-                    ctx.arc(w2, h2, radius, 0, 2 * Math.PI);
+                    ctx.arc(xpos, h2 - 100, radius, 0, 2 * Math.PI);
                     ctx.stroke();
                     ctx.closePath();
 
-                    ctx.fillStyle = "#750"; 
-                    spectrum = fft.analyze();
+                }
 
-                    for (var i = 0; i < spectrum.length; i++) {
-                        var x = map(i, 0, spectrum.length, 0, canvas.width);
-                        var h = -canvas.height + map(spectrum[i], 0, 255, canvas.height, 0);
-                        ctx.fillRect(x, canvas.height, canvas.width / spectrum.length, h);
+                function keyPressed(){
+                    if(stopped){
+                        loop();
+                    }
+                    else{
+                        noLoop();
                     }
 
+                    stopped = !stopped;
                 }
 
             </script>
