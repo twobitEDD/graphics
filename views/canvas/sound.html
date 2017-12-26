@@ -8,6 +8,15 @@
     <script src='https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.16/p5.min.js'></script>
     <script src="/scripts/p5/p5.sound.js"></script>
 
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-35814018-2"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'UA-35814018-2');
+    </script>
+
     <style>
         body {
             font-family: 'Consolas', 'Monospaced';
@@ -42,8 +51,8 @@
             <canvas id="canvas"></canvas>
             <div id='paused'>
                 <h1>Happy holidays PUMA</h1>
-                <p>You can use your microphone to say your name, put on a song or make random animal noises. You will get
-                    a unique visualization just for you =]
+                <p>You can use your microphone to say your name, put on a song or make random animal noises. You will get a
+                    unique visualization just for you =]
                     <br/>
                     <br/> Press the space bar to pause/resume.
                     <br/>
@@ -63,7 +72,7 @@
                 var squares = [];
 
                 var frame = 0;
-
+                // Finding ways to procrastinate userflows
                 function setup() {
                     canvas = document.getElementById('canvas');
                     canvas.width = window.innerWidth;
@@ -81,9 +90,7 @@
                     fft = new p5.FFT(0.8);
                     fft.setInput(mic);
 
-                    // var c = color('magenta');
-                    //console.log(c.toString());
-
+                    // Do you think dinosaurs had dreams and hopes too?
                     for (var i = 0; i < cantCols; i++) {
                         squares[i] = [];
                         for (var j = 0; j < cantRows; j++) {
@@ -114,7 +121,7 @@
                     var seRatio = spectrum.length / energySlots; // Spectrum/energy ratio
                     for (var i = 0; i < energySlots; i++) {
                         // Get the energy for that frequency
-                        var freq =  seRatio * i;
+                        var freq = seRatio * i;
                         var e = fft.getEnergy(freq);
 
                         // The purple color of the circle will change depending on its position
@@ -133,7 +140,7 @@
                     var freq_index = centroid / (nyquist / spectrum.length);
 
                     var ypos = map(centroid, 0, 2048, 0, canvas.height, true);
-                    if(freq_index <  cantRows){
+                    if (freq_index < cantRows) {
                         squares[frame][Math.floor(freq_index)] = 1;
                     }
 
@@ -148,7 +155,7 @@
                             if (squares[i][j] == 1) {
                                 ctx.fillRect(i * squareWidth, j * squareHeight, squareWidth, squareHeight);
                                 ctx.fillRect(canvas.width - i * squareWidth, j * squareHeight, squareWidth, squareHeight);
-                            } 
+                            }
                         }
 
                     }
@@ -170,7 +177,7 @@
                 }
 
                 function keyPressed() {
-
+                    // Should I make the screen explode everytime you press a key? Nah....
                     if (keyCode === 77) {
                         if (hidden) {
                             pausedMessage.classList.remove('hidden');
