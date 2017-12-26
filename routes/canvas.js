@@ -13,7 +13,7 @@ router.get('/:experiment', function (req, res, next) {
     var page = req.params.experiment;
     var allowed = ["circles", "circles2", "falling", "fractalSubdivision", "lines", "magenta",
         "pendulum", "permutations", "pursuitCurves", "pursuitCurves2", "recursive", 
-        "rotatingshapes", "spiro", "spiroAnim", "triangles", "sound"];
+        "rotatingshapes", "spiro", "spiroAnim", "triangles", "sound", "puma"];
 
     
     if (_.contains(allowed, page)) {
