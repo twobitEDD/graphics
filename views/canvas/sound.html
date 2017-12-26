@@ -137,24 +137,32 @@
 
                     let centroid = fft.getCentroid();
                     var nyquist = 22050;
-                    var freq_index = centroid / (nyquist / spectrum.length);
+                    var freq_index = Math.floor(centroid / (nyquist / spectrum.length));
 
                     var ypos = map(centroid, 0, 2048, 0, canvas.height, true);
                     if (freq_index < cantRows) {
-                        squares[frame][Math.floor(freq_index)] = 1;
+                        squares[frame][freq_index] = 1; // go from the side to the center until it reaches the center, repeat
+                        squares[cantCols-1][cantRows - freq_index] = 2; // alwasy starting from the center
                     }
 
                     var red = 0;
                     var green = 255 - greenColor;
                     var blue = 155 + greenColor;
-                    ctx.fillStyle = "rgba(" + red + "," + green + "," + blue + ", 0.5)";
+                   
 
                     for (var i = 0; i < squares.length; i++) {
                         for (var j = 0; j < squares[0].length; j++) {
 
                             if (squares[i][j] == 1) {
+                                ctx.fillStyle = "rgba(" + red + "," + green + "," + blue + ", 0.5)";
                                 ctx.fillRect(i * squareWidth, j * squareHeight, squareWidth, squareHeight);
                                 ctx.fillRect(canvas.width - i * squareWidth, j * squareHeight, squareWidth, squareHeight);
+                            }
+
+                            if (squares[i][j] == 2) {
+                                ctx.fillStyle = "rgba(255,170,0,0.4)";
+                                ctx.fillRect(i * squareWidth, j * squareHeight, squareWidth/2, squareHeight/2);
+                                ctx.fillRect(canvas.width - i * squareWidth, j * squareHeight, squareWidth/2, squareHeight/2);
                             }
                         }
 
