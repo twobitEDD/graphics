@@ -43,11 +43,11 @@
             <div id='paused'>
                 <h1>Happy holidays PUMA</h1>
                 <p>You can use your microphone to say your name, put on a song or make random animal noises. You will get
-                    a unique visualization just for you.
+                    a unique visualization just for you =]
                     <br/>
-                    <br/> Press the space bar to pause/resume
+                    <br/> Press the space bar to pause/resume.
                     <br/>
-                    <br/> Press 'M' to show this message
+                    <br/> Press 'M' to show this message.
                 </p>
                 <br/>
             </div>
@@ -96,99 +96,59 @@
                 function draw() {
 
                     var micLevel = mic.getLevel();
-                    var radius = map(micLevel, 0.0, 1, 10, w2);
-
                     var gray = map(micLevel, 0.0, 1, 0, 500);
-                    var greenColor = map(micLevel, 0.0, 1, 150, 255);
+                    var greenColor = map(micLevel, 0.0, 1, 0, 100);
 
-                    var c = color(gray);
-                    c.setAlpha(25.6);
-                    // console.log(c.toString());
-                    ctx.fillStyle = c.toString();//"rgba(0,0,0, 0.1)";
+                    var c = color(gray); // Make the background color change in intensity depending on the overall volume
+                    c.setAlpha(25.6); // an alpha gives the fading effect to the animations
+
+                    ctx.fillStyle = c.toString();
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                    //ctx.fillStyle = "#750";
+                    // We need to call analyze before doing the next computations
                     spectrum = fft.analyze();
 
-                    // for (var i = 0; i < spectrum.length; i++) {
-                    //     var x = map(i, 0, spectrum.length, 0, canvas.width);
-                    //     var h = -canvas.height + map(spectrum[i], 0, 255, canvas.height, 0);
-                    //     ctx.fillRect(x, canvas.height, canvas.width / spectrum.length, h);
-                    // }
-                    // var energy = 'Energy: ';
-
-
+                    // Divide the spectrum in N slots, get the energy level for each frequency
+                    // Draw a circle with a radius that represents that amount of energy
                     var energySlots = 100;
+                    var seRatio = spectrum.length / energySlots; // Spectrum/energy ratio
                     for (var i = 0; i < energySlots; i++) {
-                        var freq = (spectrum.length / energySlots) * i;
+                        // Get the energy for that frequency
+                        var freq =  seRatio * i;
                         var e = fft.getEnergy(freq);
 
-                        // energy += ' ' + freq + ': ' + e + ' ,';
+                        // The purple color of the circle will change depending on its position
                         var red = 155 + i;
-                        var blue = 255;
-                        ctx.strokeStyle = "rgba(" + red + ", 0," + blue + ", 1)";
+                        ctx.strokeStyle = "rgba(" + red + ", 0, 255, 1)";
+
+                        // Draw the circle
                         ctx.beginPath();
-                        ctx.arc(w2, i * ((canvas.height - 50) / energySlots) + 25, e, 0, 2 * Math.PI);
+                        ctx.arc(w2, i * (canvas.height / energySlots), e, 0, 2 * Math.PI);
                         ctx.stroke();
                         ctx.closePath();
-
-                        //paint on left side
-                        // ctx.fillStyle = "#00FFBB";
-                        // var colNumber = Math.floor(i / cantRows);
-                        // var rowNumber = cantCols % i;
-
-
-
-                        // console.log(colNumber, rowNumber);
-
-                        // ctx.fillRect(colNumber * squareWidth,
-                        //     rowNumber * squareHeight,
-                        //     squareWidth, squareHeight);
-
                     }
 
-
-
-                    // energySpan.innerText = energy;
-
                     let centroid = fft.getCentroid();
-
                     var nyquist = 22050;
-
-                    var mean_freq_index = centroid / (nyquist / spectrum.length);
-                    // console.log(mean_freq_index);
+                    var freq_index = centroid / (nyquist / spectrum.length);
 
                     var ypos = map(centroid, 0, 2048, 0, canvas.height, true);
-                    var rowIndex = mean_freq_index > cantRows ? cantRows - 1 : mean_freq_index;// map(centroid, 0, 22050, 0, 100, true);
+                    if(freq_index <  cantRows){
+                        squares[frame][Math.floor(freq_index)] = 1;
+                    }
 
-                    squares[frame][Math.floor(rowIndex)] = 1;
-                    // console.log(frame, Math.floor(rowIndex));
-                    var margin = 5;
-
-                    // ctx.lineWidth = 0.5;
-                    // ctx.strokeStyle = "#00FFBB";
-                    // ctx.fillStyle = "rgba(0,255, 200, 0.6)";
                     var red = 0;
-                    var green = 255;
-                    var blue = greenColor;
-                    ctx.fillStyle = "rgba(" + red + "," + green + "," + blue + ", 0.6)";
-
-
-                    // ctx.beginPath();
-                    // ctx.arc(w2 - 300, ypos, radius, 0, 2 * Math.PI);
-                    // ctx.stroke();
-                    // ctx.closePath();
+                    var green = 255 - greenColor;
+                    var blue = 155 + greenColor;
+                    ctx.fillStyle = "rgba(" + red + "," + green + "," + blue + ", 0.5)";
 
                     for (var i = 0; i < squares.length; i++) {
                         for (var j = 0; j < squares[0].length; j++) {
 
                             if (squares[i][j] == 1) {
-                                ctx.fillRect(i * squareWidth + margin, j * squareHeight + margin, squareWidth, squareHeight);
-                                ctx.fillRect(canvas.width - i * squareWidth + margin, j * squareHeight + margin, squareWidth, squareHeight);
-                            } else {
-                                // ctx.strokeRect(i * squareWidth + margin, j * squareHeight + margin, squareWidth, squareHeight);
-                            }
-
+                                ctx.fillRect(i * squareWidth, j * squareHeight, squareWidth, squareHeight);
+                                ctx.fillRect(canvas.width - i * squareWidth, j * squareHeight, squareWidth, squareHeight);
+                            } 
                         }
 
                     }
@@ -211,8 +171,6 @@
 
                 function keyPressed() {
 
-                    console.log(keyCode);
-
                     if (keyCode === 77) {
                         if (hidden) {
                             pausedMessage.classList.remove('hidden');
@@ -233,11 +191,11 @@
                         stopped = !stopped;
                     }
 
-                    return false;
-
                 }
 
-
+                console.log("Don't be sneaky 👀! Just enjoy it");
+                console.log('Press the spacebar to pause it / save the image.');
+                console.log("Press 'M' to see the message");
 
             </script>
         </body>
