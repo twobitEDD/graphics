@@ -1,7 +1,7 @@
 <html>
 
 <head>
-    <title>Sound</title>
+    <title>PUMA Holiday viz</title>
     <meta content="Sound, canvas, js, creative coding, generative art, genart" name="keywords">
     <meta content="." name="description">
 
@@ -10,16 +10,28 @@
 
     <style>
         body {
-            font-family: 'Open Sans', 'Verdana', 'Monospaced';
+            font-family: 'Consolas', 'Monospaced';
             margin: 0 auto;
             overflow: hidden;
             color: #fff;
         }
 
+        h1 {
+            font-weight: 500;
+            font-size: 20px;
+        }
+
         div {
             position: absolute;
-            top: 0;
-            left: 0;
+            top: 050px;
+            width: 700px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid #0084FF;
+            padding: 10px;
+        }
+
+        .hidden {
+            display: none;
         }
     </style>
 
@@ -28,15 +40,21 @@
         <body>
 
             <canvas id="canvas"></canvas>
-            <div>
-                <h1>Sound</h1>
-                <span id="energy"></span>
+            <div id='paused'>
+                <h1>Happy holidays PUMA</h1>
+                <p>You can use your microphone to say your name, put on a song or make random animal noises. You will get
+                    a unique visualization just for you.
+                    <br/>
+                    <br/> Press the space bar to pause/resume
+                    <br/>
+                    <br/> Press 'M' to show this message
+                </p>
                 <br/>
             </div>
             <script>
 
-                var canvas, ctx, w2, mic, h2, fft, spectrum, waveform, stopped = false;
-                var energySpan = document.getElementById("energy");
+                var canvas, ctx, w2, mic, h2, fft, spectrum, waveform, stopped = false, hidden = false;
+                var pausedMessage = document.getElementById("paused");
                 var cantRows = 220;
                 var cantCols = 80;
                 var squareWidth = 5;
@@ -192,15 +210,34 @@
                 }
 
                 function keyPressed() {
-                    if (stopped) {
-                        loop();
-                    }
-                    else {
-                        noLoop();
+
+                    console.log(keyCode);
+
+                    if (keyCode === 77) {
+                        if (hidden) {
+                            pausedMessage.classList.remove('hidden');
+                        }
+                        else {
+                            pausedMessage.classList.add('hidden');
+                        }
+                        hidden = !hidden;
                     }
 
-                    stopped = !stopped;
+                    if (keyCode === 32) {
+                        if (stopped) {
+                            loop();
+                        }
+                        else {
+                            noLoop();
+                        }
+                        stopped = !stopped;
+                    }
+
+                    return false;
+
                 }
+
+
 
             </script>
         </body>
