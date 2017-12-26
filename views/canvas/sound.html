@@ -35,9 +35,16 @@
             </div>
             <script>
 
-                var canvas, ctx, w2, mic, h2, fft, spectrum, waveform, stopped= false;
+                var canvas, ctx, w2, mic, h2, fft, spectrum, waveform, stopped = false;
                 var energySpan = document.getElementById("energy");
+                var cantRows = 220;
+                var cantCols = 80;
+                var squareWidth = 5;
+                var squareHeight = 5;
 
+                var squares = [];
+
+                var frame = 0;
 
                 function setup() {
                     canvas = document.getElementById('canvas');
@@ -48,20 +55,33 @@
                     w2 = window.innerWidth / 2;
                     h2 = window.innerHeight / 2;
 
+                    squareWidth = w2 / cantCols;
+                    squareHeight = canvas.height / cantRows;
+
                     mic = new p5.AudioIn()
                     mic.start();
                     fft = new p5.FFT(0.8);
                     fft.setInput(mic);
 
-                   // var c = color('magenta');
+                    // var c = color('magenta');
                     //console.log(c.toString());
+
+                    for (var i = 0; i < cantCols; i++) {
+                        squares[i] = [];
+                        for (var j = 0; j < cantRows; j++) {
+                            squares[i][j] = 0;
+                        }
+                    }
+
                 }
 
                 function draw() {
+
                     var micLevel = mic.getLevel();
                     var radius = map(micLevel, 0.0, 1, 10, w2);
 
                     var gray = map(micLevel, 0.0, 1, 0, 500);
+                    var greenColor = map(micLevel, 0.0, 1, 150, 255);
 
                     var c = color(gray);
                     c.setAlpha(25.6);
@@ -78,8 +98,7 @@
                     //     ctx.fillRect(x, canvas.height, canvas.width / spectrum.length, h);
                     // }
                     // var energy = 'Energy: ';
-                    var cantRows = 20;
-                    var cantCols = 5;
+
 
                     var energySlots = 100;
                     for (var i = 0; i < energySlots; i++) {
@@ -96,42 +115,87 @@
                         ctx.closePath();
 
                         //paint on left side
-                        ctx.fillStyle = "#00FFBB";
-                        var colNumber = Math.floor(i/cantRows);
-                        var rowNumber = cantCols%i;
+                        // ctx.fillStyle = "#00FFBB";
+                        // var colNumber = Math.floor(i / cantRows);
+                        // var rowNumber = cantCols % i;
 
-                        var squareWidth = 10;
-                        var squareHeight = 10;
+
 
                         // console.log(colNumber, rowNumber);
 
-                        ctx.fillRect(colNumber * squareWidth,
-                        rowNumber * squareHeight,
-                        10,10);
-
+                        // ctx.fillRect(colNumber * squareWidth,
+                        //     rowNumber * squareHeight,
+                        //     squareWidth, squareHeight);
 
                     }
+
+
 
                     // energySpan.innerText = energy;
 
                     let centroid = fft.getCentroid();
 
-                    var xpos = map(centroid, 0, 1024, 0, canvas.width);
+                    var nyquist = 22050;
 
-                    ctx.lineWidth = 0.5;
-                    ctx.strokeStyle = "#00FFBB";
-                    ctx.beginPath();
-                    ctx.arc(xpos, h2 - 100, radius, 0, 2 * Math.PI);
-                    ctx.stroke();
-                    ctx.closePath();
+                    var mean_freq_index = centroid / (nyquist / spectrum.length);
+                    // console.log(mean_freq_index);
+
+                    var ypos = map(centroid, 0, 2048, 0, canvas.height, true);
+                    var rowIndex = mean_freq_index > cantRows ? cantRows - 1 : mean_freq_index;// map(centroid, 0, 22050, 0, 100, true);
+
+                    squares[frame][Math.floor(rowIndex)] = 1;
+                    // console.log(frame, Math.floor(rowIndex));
+                    var margin = 5;
+
+                    // ctx.lineWidth = 0.5;
+                    // ctx.strokeStyle = "#00FFBB";
+                    // ctx.fillStyle = "rgba(0,255, 200, 0.6)";
+                    var red = 0;
+                    var green = 255;
+                    var blue = greenColor;
+                    ctx.fillStyle = "rgba(" + red + "," + green + "," + blue + ", 0.6)";
+
+
+                    // ctx.beginPath();
+                    // ctx.arc(w2 - 300, ypos, radius, 0, 2 * Math.PI);
+                    // ctx.stroke();
+                    // ctx.closePath();
+
+                    for (var i = 0; i < squares.length; i++) {
+                        for (var j = 0; j < squares[0].length; j++) {
+
+                            if (squares[i][j] == 1) {
+                                ctx.fillRect(i * squareWidth + margin, j * squareHeight + margin, squareWidth, squareHeight);
+                                ctx.fillRect(canvas.width - i * squareWidth + margin, j * squareHeight + margin, squareWidth, squareHeight);
+                            } else {
+                                // ctx.strokeRect(i * squareWidth + margin, j * squareHeight + margin, squareWidth, squareHeight);
+                            }
+
+                        }
+
+                    }
+
+                    frame += 1;
+                    if (frame >= cantCols) {
+                        frame = 0;
+                    }
+
+                    var newRow = [];
+                    for (var j = 0; j < cantRows; j++) {
+                        newRow[j] = 0;
+                    }
+
+
+                    squares.splice(0, 1);
+                    squares.push(newRow);
 
                 }
 
-                function keyPressed(){
-                    if(stopped){
+                function keyPressed() {
+                    if (stopped) {
                         loop();
                     }
-                    else{
+                    else {
                         noLoop();
                     }
 
